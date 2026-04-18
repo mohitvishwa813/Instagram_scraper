@@ -2,7 +2,7 @@
 FROM apify/actor-node-playwright-chrome:20
 
 # Copy all files from the current directory to the container
-COPY . ./
+COPY --chown=myuser:myuser . ./
 
 # Install production dependencies (skip postinstall — base image has Chrome)
 RUN npm install --quiet --omit=dev --no-optional --ignore-scripts
