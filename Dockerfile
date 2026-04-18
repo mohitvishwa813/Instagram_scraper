@@ -4,11 +4,8 @@ FROM apify/actor-node-playwright-chrome:20
 # Copy all files from the current directory to the container
 COPY . ./
 
-# Install production dependencies
-RUN npm install --quiet --only=prod --no-optional
-
-# Ensure Playwright can find the system Chrome and its shared-library deps
-RUN npx playwright install --with-deps chromium || true
+# Install production dependencies (skip postinstall — base image has Chrome)
+RUN npm install --quiet --omit=dev --no-optional --ignore-scripts
 
 # Start the HTTP server (listens on $PORT, default 3000)
 CMD ["npm", "start"]
