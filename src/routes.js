@@ -103,7 +103,11 @@ router.addHandler('KEYWORD_SEARCH', async ({ page, request, log, crawler }) => {
   // ── DEEP DISCOVERY: Search Page & Post Authors ─────────────────────────────
   const keywordUrl = `https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(keyword)}`;
   log.info(`🚀 Starting Deep Discovery via: ${keywordUrl}`);
-  
+
+  let profileLinks = [];
+  let postLinks = [];
+
+  try {
   await page.goto(keywordUrl, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1500);
 
@@ -114,7 +118,7 @@ router.addHandler('KEYWORD_SEARCH', async ({ page, request, log, crawler }) => {
   }
 
   // 1. Grab account links using XPath and strict filtering
-  const profileLinks = await page.evaluate(() => {
+  profileLinks = await page.evaluate(() => {
     // XPath for finding links that look like profile links
     const xpath = '//a[contains(@href, "/")]';
     const result = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -139,34 +143,29 @@ router.addHandler('KEYWORD_SEARCH', async ({ page, request, log, crawler }) => {
     return links;
   });
 
+  // 2. Grab post links and scan their authors
+  postLinks = await page.$$eval('a[href*="/p/"]', (links) => {
+    return links.map(a => a.href);
+  });
+
+  } catch (e) {
+    log.warning(`Deep discovery skipped (${e.message}) — returning API results only.`);
+  }
+
   for (const { href: profileUrl } of profileLinks) {
     const u = profileUrl.split('/').filter(Boolean).pop();
     if (u && !seenUsernames.has(u)) {
       seenUsernames.add(u);
-      await crawler.addRequests([{
-        url: profileUrl,
-        label: 'PROFILE',
-        userData: { source },
-      }]);
+      await crawler.addRequests([{ url: profileUrl, label: 'PROFILE', userData: { source } }]);
     }
   }
 
-  // 2. Grab post links and scan their authors
-  const postLinks = await page.$$eval('a[href*="/p/"]', (links) => {
-    return links.map(a => a.href);
-  });
-
   const postsToScan = CONFIG.maxPostsToScan || 20;
   const selectedPosts = postLinks.slice(0, postsToScan);
-  
   log.info(`  Found ${selectedPosts.length} posts to scan for more accounts.`);
 
   for (const postUrl of selectedPosts) {
-    await crawler.addRequests([{
-      url: postUrl,
-      label: 'POST',
-      userData: { source },
-    }]);
+    await crawler.addRequests([{ url: postUrl, label: 'POST', userData: { source } }]);
   }
 });
 

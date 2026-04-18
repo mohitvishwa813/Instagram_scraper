@@ -20,7 +20,7 @@ export const CONFIG = {
 
   // ── Crawler behaviour ───────────────────────────────────────
   maxRequests: 500,         // Hard cap on total HTTP requests
-  maxConcurrency: 4,        // Parallel browser pages
+  maxConcurrency: 1,        // Keep low — Render free plan has limited RAM
   requestTimeoutSecs: 45,   // Timeout per page
 
   // Run browser in headless mode (true = no GUI, recommended for servers)

@@ -75,7 +75,16 @@ const server = http.createServer(async (req, res) => {
 
   let responded = false;
 
+  // 4.5 min timeout — kill child and return whatever was collected
+  const timeout = setTimeout(() => {
+    if (!responded) {
+      console.log('⏱ Timeout reached (4.5 min), returning partial results...');
+      child.kill('SIGTERM');
+    }
+  }, 4.5 * 60 * 1000);
+
   child.on('error', (err) => {
+    clearTimeout(timeout);
     isRunning = false;
     if (!responded) {
       responded = true;
@@ -84,6 +93,7 @@ const server = http.createServer(async (req, res) => {
   });
 
   child.on('close', (code) => {
+    clearTimeout(timeout);
     isRunning = false;
     if (responded) return;
     responded = true;

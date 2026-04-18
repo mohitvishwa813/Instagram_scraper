@@ -126,9 +126,13 @@ const crawler = new PlaywrightCrawler({
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-blink-features=AutomationControlled',
-        '--disable-dev-shm-usage',   // prevents crashes in low /dev/shm containers
+        '--disable-dev-shm-usage',
         '--disable-gpu',
         '--disable-extensions',
+        '--js-flags=--max-old-space-size=256',
+        '--disable-background-networking',
+        '--disable-sync',
+        '--disable-translate',
       ],
     },
   },
@@ -154,6 +158,13 @@ const crawler = new PlaywrightCrawler({
   failedRequestHandler: async ({ request }, error) => {
     console.log(chalk.red(`✖  Failed [${request.label}]: ${request.url} — ${error.message}`));
   },
+});
+
+// Export partial results on timeout (SIGTERM from server)
+process.on('SIGTERM', async () => {
+  console.log(chalk.yellow('\n⏱ SIGTERM received — exporting partial results...'));
+  await exportResults();
+  process.exit(0);
 });
 
 await crawler.run(startUrls);
