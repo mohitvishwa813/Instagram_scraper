@@ -6,6 +6,9 @@ import { exportResults } from './exporter.js';
 import { CONFIG } from './config.js';
 import chalk from 'chalk';
 
+// Must be set before Actor.init() so stale request queues are purged on each run
+Configuration.getGlobalConfig().set('purgeOnStart', true);
+
 await Actor.init();
 
 console.log(chalk.magenta.bold(`
@@ -14,9 +17,6 @@ console.log(chalk.magenta.bold(`
 ║     Keyword → Account Username & Name    ║
 ╚══════════════════════════════════════════╝
 `));
-
-// ─── Setup ──────────────────────────────────────────────────────────────────
-Configuration.getGlobalConfig().set('purgeOnStart', true);
 
 // ─── Get Input ───────────────────────────────────────────────────────────────
 const input = await Actor.getInput();

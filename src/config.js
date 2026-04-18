@@ -20,14 +20,14 @@ export const CONFIG = {
 
   // ── Crawler behaviour ───────────────────────────────────────
   maxRequests: 500,         // Hard cap on total HTTP requests
-  maxConcurrency: 2,        // Parallel browser pages (keep low to avoid bans)
-  requestTimeoutSecs: 60,   // Timeout per page
+  maxConcurrency: 4,        // Parallel browser pages
+  requestTimeoutSecs: 45,   // Timeout per page
 
   // Run browser in headless mode (true = no GUI, recommended for servers)
   headless: true,
 
   // Delay between requests in ms (randomised ± 50% to appear human)
-  delayMs: 2000,
+  delayMs: 800,
 
   // ── Webhook ────────────────────────────────────────────────
   // Optional: Send results to this URL after completion.

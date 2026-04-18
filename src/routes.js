@@ -19,7 +19,7 @@ router.addHandler('KEYWORD_SEARCH', async ({ page, request, log, crawler }) => {
   console.log(chalk.magenta(`🏁 SEARCH STARTED: "${keyword}"`));
   log.info(`🔍 Scraping keyword: "${keyword}"`);
 
-  await delay(800);
+  await delay(300);
 
   // ── ALPHABETICAL DISCOVERY (Get hundreds of results) ────────────────────────
   const alphabet = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
@@ -93,7 +93,7 @@ router.addHandler('KEYWORD_SEARCH', async ({ page, request, log, crawler }) => {
         break;
       }
 
-      await page.waitForTimeout(1000 + Math.random() * 1000); // Random delay to stay safe
+      await page.waitForTimeout(300 + Math.random() * 300); // Random delay to stay safe
     } catch (e) {
       const errorMsg = e.message || (sessionData && sessionData.error ? sessionData.error : 'Unknown error');
       log.warning(`  [${char || 'top'}] Search failed: ${errorMsg}`);
@@ -104,13 +104,13 @@ router.addHandler('KEYWORD_SEARCH', async ({ page, request, log, crawler }) => {
   const keywordUrl = `https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(keyword)}`;
   log.info(`🚀 Starting Deep Discovery via: ${keywordUrl}`);
   
-  await page.goto(keywordUrl, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(3000);
+  await page.goto(keywordUrl, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1500);
 
   // Scroll a bit to load more posts
   for (let i = 0; i < 3; i++) {
     await page.evaluate(() => window.scrollBy(0, 800));
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
   }
 
   // 1. Grab account links using XPath and strict filtering
@@ -226,8 +226,7 @@ router.addHandler('PROFILE', async ({ page, request, log }) => {
     return;
   }
 
-  await page.waitForTimeout(1500);
-
+  await page.waitForTimeout(500);
 
   // Extract username and full name only
   const accountData = await page.evaluate((args) => {
